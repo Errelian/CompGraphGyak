@@ -1,0 +1,34 @@
+külön értékelt mint az EA, nagy ZH a végén, nagybeadandó kiválthatja a ZH-t, nem ajánlják
+2 beadandó amikre pont jár, mínusz is járhat
+kisházikra is járhatnak plusz pontok
+
+cg.elte.hu
+
+SDL könyvtár -> cross platform ablakkezeő 
+GLEW
+GLM - > OpenGL mathetmatics, vektorokat stb tartalmaz
+
+képernyő szélesség -> query, elosztod az x koordinatad a MouseMove-ban, szeteled 
+
+headerben protected float
+float invWidth = 0f;
+glm:vec3 clearColor = glm::vec3(0.125f, 0.25f, 0.5f);
+
+resize-ban? beállítjuk a class szintú változót
+
+MouseMove-ban állítjük be a glClearColor-t új színnel
+
+reaktív-legyen, ne updat-eben nyomjam
+
+glViewport(0, 0, _w, _h)
+invWidth = 1.f/(float)_w	
+
+if (mouse.state & SDL_BUTTON_LMASK) mouseMove-ban
+
+imGui!!
+
+ImGui::Begin()
+
+
+vec3 nem tömb DE egymás után vannak a memóriában és lehet tömbként kezelni
+
