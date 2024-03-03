@@ -52,11 +52,9 @@ protected:
 
 	float m_ElapsedTimeInSec = 0.0f;
 
-	glm::vec2 viewPortSize = glm::vec2(0.0, 0.0);
-
 	//
 	// OpenGL-es dolgok
-	// 
+	//
 	
 	// shaderekhez szükséges változók
 	GLuint m_programID = 0; // shaderek programja
@@ -64,5 +62,21 @@ protected:
 	// Shaderek inicializálása, és törtlése
 	void InitShaders();
 	void CleanShaders();
+
+	// Geometriával kapcsolatos változók
+
+	GLuint circleVaoID = 1; //circle vao
+	GLuint circleVboID = 1; //circle vbo
+
+	GLsizei circleCount = 0; //circle vertex count
+
+	GLuint  vaoID = 0; // vertex array object erőforrás azonosító
+	GLuint  vboID = 0; // vertex buffer object erőforrás azonosító
+
+	GLsizei count = 0; // mennyi indexet/vertexet kell rajzolnunk
+
+	// Geometria inicializálása, és törtlése
+	void InitGeometry();
+	void CleanGeometry();
 };
 

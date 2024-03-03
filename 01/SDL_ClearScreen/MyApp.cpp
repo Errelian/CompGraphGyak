@@ -64,9 +64,9 @@ void CMyApp::RenderGUI()
 {
 	// ImGui::ShowDemoWindow();
 
-	if (ImGui::Begin("My Window")) 
+	if (ImGui::Begin("My Window"))
 	{
-		if (ImGui::SliderFloat3("color3", &clearColor.x, 0.f, 1.f)) 
+		if (ImGui::SliderFloat3("color3", &clearColor.x, 0.f, 1.f))
 		{
 			glClearColor(clearColor.x, clearColor.y, clearColor.z, 1.f);
 		}

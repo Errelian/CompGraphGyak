@@ -32,5 +32,5 @@ void main()
 	{
 		discard;
 	}
-	fs_out_col = vec4(0.8, 0.4, 0.1, 1);
+	fs_out_col = vec4(0, 0, 0, 1);
 }
