@@ -40,16 +40,31 @@ void CMyApp::InitGeometry()
 {
 	MeshObject<VertexPosColor> meshCPU;
 
-	meshCPU.vertexArray = 
-	{
-		{ glm::vec3( -1, -1, 0), glm::vec3(1, 0, 0) },
-		{ glm::vec3(  1, -1, 0), glm::vec3(0, 1, 0) },
-		{ glm::vec3( -1,  1, 0), glm::vec3(0, 0, 1) },
 
-		{ glm::vec3( -1,  1, 0), glm::vec3(0, 0, 1) },
-		{ glm::vec3(  1, -1, 0), glm::vec3(0, 1, 0) },
-		{ glm::vec3(  1,  1, 0), glm::vec3(1, 1, 1) }
-	};
+	constexpr int pointCount= 64;
+	meshCPU.vertexArray.push_back({ glm::vec3(0, 0, 0), {0.25, 0.50, 0.75} });
+
+	for (int i = 0; i < pointCount; i++ ) {
+	
+		glm::vec3 pos = glm::vec3(cosf((i / (float)pointCount) * glm::two_pi<float>()),
+			sinf((i / (float)pointCount) * glm::two_pi<float>()),
+			0.f);
+
+		glm::vec3 col = pos * 0.5f + 0.5f; //nem mindegyik más szinű ha csak pos-t adok át mert negatív számok bal alul
+
+		meshCPU.vertexArray.push_back({ pos, col });
+	}
+
+	for (int i = 0; i < pointCount - 1; i++) {
+
+		meshCPU.indexArray.push_back(0);
+		meshCPU.indexArray.push_back(i+1);
+		meshCPU.indexArray.push_back(i+2);
+	}
+	meshCPU.indexArray.push_back(0);
+	meshCPU.indexArray.push_back(pointCount);
+	meshCPU.indexArray.push_back(1);
+
 
 	// 1 db VAO foglalasa
 	glGenVertexArrays(1, &vaoID);
@@ -76,7 +91,7 @@ void CMyApp::InitGeometry()
 		reinterpret_cast<const void*>(offsetof(VertexPosColor,position )) // a 0. indexű attribútum hol kezdődik a sizeof(Vertex)-nyi területen belül
 	);
 
-	glEnableVertexAttribArray(1); // ez lesz majd a szín
+	glEnableVertexAttribArray(1); // ez lesz majd a pozíció
 	glVertexAttribPointer(
 		1,						  // a VB-ben található adatok közül a 1. "indexű" attribútumait állítjuk be
 		3,						  // komponens szam
@@ -86,80 +101,24 @@ void CMyApp::InitGeometry()
 		reinterpret_cast<const void*>(offsetof(VertexPosColor,color )) // a 1. indexű attribútum hol kezdődik a sizeof(Vertex)-nyi területen belül
 	);
 
-	count = static_cast<GLsizei>(meshCPU.vertexArray.size());
-	
-	//glBindVertexArray( 0 ); // Kapcsoljuk ki a VAO-t!
+	// index puffer létrehozása
+	glGenBuffers(1, &iboID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+				  meshCPU.indexArray.size() * sizeof(GLuint), 
+				  meshCPU.indexArray.data(), 
+				  GL_STATIC_DRAW);
 
-	constexpr GLfloat twoRadians = 2.0f * 3.14159265f;
-	constexpr GLfloat radius = 0.5f;
-	constexpr glm::vec3 circleColour = glm::vec3(1, 0, 0);
-	constexpr GLfloat circleDepth = -0.5f;
+	count = static_cast<GLsizei>(meshCPU.indexArray.size());
 
-	MeshObject<VertexPosColor> circleMeshCPU;
-
-	circleMeshCPU.vertexArray.push_back({ glm::vec3(0,0,0), circleColour }); //center
-
-	for (int i = 0; i <= circleTriangleCount; i++) 
-	{
-		circleMeshCPU.vertexArray.push_back(
-			{
-				glm::vec3(
-					radius * cos(i * twoRadians / circleTriangleCount),
-					radius * sin(i * twoRadians / circleTriangleCount),
-					circleDepth
-				),
-
-				circleColour
-			}
-		);
-	}
-
-
-	glGenVertexArrays(1, &circleVaoID);
-	glBindVertexArray(circleVaoID);
-
-	glGenBuffers(1, &circleVboID);
-	glBindBuffer(GL_ARRAY_BUFFER, circleVboID); 
-
-
-	glBufferData(GL_ARRAY_BUFFER,	
-		circleMeshCPU.vertexArray.size() * sizeof(VertexPosColor),		
-		circleMeshCPU.vertexArray.data(),	
-		GL_STATIC_DRAW);	
-
-	glEnableVertexAttribArray(0); 
-	glVertexAttribPointer(
-		0,						  
-		3,						 
-		GL_FLOAT,				 
-		GL_FALSE,				  
-		sizeof(VertexPosColor),   
-		reinterpret_cast<const void*>(offsetof(VertexPosColor, position)) 
-	);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(
-		1,						  
-		3,						 
-		GL_FLOAT,				 
-		GL_FALSE,				
-		sizeof(VertexPosColor),   
-		reinterpret_cast<const void*>(offsetof(VertexPosColor, color)) 
-	);
-
-	circleCount = static_cast<GLsizei>(circleMeshCPU.vertexArray.size());
-
-	glBindVertexArray(0);
-
+	glBindVertexArray( 0 ); // Kapcsoljuk ki a VAO-t!
 }
 
 void CMyApp::CleanGeometry()
 {
 	glDeleteBuffers(1,      &vboID);
+	glDeleteBuffers(1,      &iboID);
 	glDeleteVertexArrays(1, &vaoID);
-
-	glDeleteBuffers(1, &circleVboID);
-	glDeleteVertexArrays(1, &circleVaoID);
 }
 
 bool CMyApp::Init()
@@ -207,42 +166,22 @@ void CMyApp::Render()
 	// shader bekapcsolasa
 	glUseProgram( m_programID );
 
-	// kirajzolás: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDrawArrays.xhtml
-	glDrawArrays( GL_TRIANGLES,	// primitív típusa; amikkel mi foglalkozunk: GL_POINTS, GL_LINE_STRIP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES
-				  0,			// melyik vertex az elso
-				  count );		// hány csúcspontot használjunk a primitívek kirajzolására
+	// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawElements.xhtml
+	glDrawElements( GL_TRIANGLES,    // primitív típusa; u.a mint glDrawArrays esetén
+					count,			 // mennyi indexet rajzoljunk
+					GL_UNSIGNED_INT, // indexek típusa
+					nullptr );       // hagyjuk nullptr-en!
+
+	// shader kikapcsolasa
+	glUseProgram( 0 );
 
 	// VAO kikapcsolása
 	glBindVertexArray( 0 );
-
-	glBindVertexArray(circleVaoID);
-
-	glDrawArrays(GL_TRIANGLE_FAN,	// primitív típusa; amikkel mi foglalkozunk: GL_POINTS, GL_LINE_STRIP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES
-				0,			// melyik vertex az elso
-				circleCount);		// hány csúcspontot használjunk a primitívek kirajzolására
-
-
-	glBindVertexArray(0);
-	// shader kikapcsolasa
-	glUseProgram(0);
-	
 }
 
 void CMyApp::RenderGUI()
 {
-	//ImGui::ShowDemoWindow();
-
-	if (ImGui::Begin("Trig Count Window 9000"))
-	{
-		if (ImGui::SliderInt("Trig count", &circleTriangleCount, 5, 100))
-		{
-			Clean();
-			InitShaders();
-			InitGeometry();
-			Render();
-		}
-	}
-	ImGui::End();
+	// ImGui::ShowDemoWindow();
 }
 
 // https://wiki.libsdl.org/SDL2/SDL_KeyboardEvent

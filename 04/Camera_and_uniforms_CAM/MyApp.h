@@ -14,6 +14,8 @@
 
 // Utils
 #include "GLUtils.hpp"
+#include "Camera.h"
+#include "CameraManipulator.h"
 
 struct SUpdateInfo
 {
@@ -52,10 +54,17 @@ protected:
 
 	float m_ElapsedTimeInSec = 0.0f;
 
+	// Kamera
+	Camera m_camera;
+	CameraManipulator m_camera_manipulator;
+
 	//
 	// OpenGL-es dolgok
 	//
 	
+	// uniform location lekérdezése
+	static GLint ul( const char* uniformName ) noexcept;
+
 	// shaderekhez szükséges változók
 	GLuint m_programID = 0; // shaderek programja
 
@@ -67,15 +76,8 @@ protected:
 
 	GLuint  vaoID = 0; // vertex array object erőforrás azonosító
 	GLuint  vboID = 0; // vertex buffer object erőforrás azonosító
-
+	GLuint  iboID = 0; // index buffer object erőforrás azonosító
 	GLsizei count = 0; // mennyi indexet/vertexet kell rajzolnunk
-
-	GLuint circleVaoID = 1; //circle vao, these cannot be const -.-
-	GLuint circleVboID = 1; //circle vbo
-
-	GLsizei circleCount = 0; //circle vertex count
-
-	int circleTriangleCount = 100;
 
 	// Geometria inicializálása, és törtlése
 	void InitGeometry();

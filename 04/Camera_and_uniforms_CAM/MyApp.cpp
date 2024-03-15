@@ -27,7 +27,7 @@ void CMyApp::SetupDebugCallback()
 void CMyApp::InitShaders()
 {
 	m_programID = glCreateProgram();
-	AssembleProgram( m_programID, "Shaders/Vert_PosCol_NoTransform.vert", "Shaders/Frag_PosCol.frag" );
+	AssembleProgram( m_programID, "Shaders/Vert_PosCol.vert", "Shaders/Frag_PosCol.frag" );
 
 }
 
@@ -40,15 +40,27 @@ void CMyApp::InitGeometry()
 {
 	MeshObject<VertexPosColor> meshCPU;
 
-	meshCPU.vertexArray = 
-	{
-		{ glm::vec3( -1, -1, 0), glm::vec3(1, 0, 0) },
-		{ glm::vec3(  1, -1, 0), glm::vec3(0, 1, 0) },
-		{ glm::vec3( -1,  1, 0), glm::vec3(0, 0, 1) },
+	static constexpr float SQRT_2 = glm::root_two<float>();
 
-		{ glm::vec3( -1,  1, 0), glm::vec3(0, 0, 1) },
-		{ glm::vec3(  1, -1, 0), glm::vec3(0, 1, 0) },
-		{ glm::vec3(  1,  1, 0), glm::vec3(1, 1, 1) }
+	meshCPU.vertexArray =
+	{
+		{ glm::vec3(-1, 0, -1), glm::vec3(1, 0, 0) },
+		{ glm::vec3( 1, 0, -1), glm::vec3(0, 1, 0) },
+		{ glm::vec3(-1, 0, 1), glm::vec3(0, 0, 1) },
+		{ glm::vec3( 1, 0, 1), glm::vec3(1, 1, 1) },
+
+		{ glm::vec3(0, 1.5, 0), glm::vec3(1,0,1)}
+	};
+
+	meshCPU.indexArray =
+	{
+		0, 1, 2,
+		1, 3, 2, //base
+
+		0, 4, 1,
+		1, 4, 3,
+		3, 4, 2,
+		2, 4, 0 //sides
 	};
 
 	// 1 db VAO foglalasa
@@ -76,7 +88,7 @@ void CMyApp::InitGeometry()
 		reinterpret_cast<const void*>(offsetof(VertexPosColor,position )) // a 0. indexű attribútum hol kezdődik a sizeof(Vertex)-nyi területen belül
 	);
 
-	glEnableVertexAttribArray(1); // ez lesz majd a szín
+	glEnableVertexAttribArray(1); // ez lesz majd a pozíció
 	glVertexAttribPointer(
 		1,						  // a VB-ben található adatok közül a 1. "indexű" attribútumait állítjuk be
 		3,						  // komponens szam
@@ -86,80 +98,24 @@ void CMyApp::InitGeometry()
 		reinterpret_cast<const void*>(offsetof(VertexPosColor,color )) // a 1. indexű attribútum hol kezdődik a sizeof(Vertex)-nyi területen belül
 	);
 
-	count = static_cast<GLsizei>(meshCPU.vertexArray.size());
-	
-	//glBindVertexArray( 0 ); // Kapcsoljuk ki a VAO-t!
+	// index puffer létrehozása
+	glGenBuffers(1, &iboID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboID);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 
+				  meshCPU.indexArray.size() * sizeof(GLuint), 
+				  meshCPU.indexArray.data(), 
+				  GL_STATIC_DRAW);
 
-	constexpr GLfloat twoRadians = 2.0f * 3.14159265f;
-	constexpr GLfloat radius = 0.5f;
-	constexpr glm::vec3 circleColour = glm::vec3(1, 0, 0);
-	constexpr GLfloat circleDepth = -0.5f;
+	count = static_cast<GLsizei>(meshCPU.indexArray.size());
 
-	MeshObject<VertexPosColor> circleMeshCPU;
-
-	circleMeshCPU.vertexArray.push_back({ glm::vec3(0,0,0), circleColour }); //center
-
-	for (int i = 0; i <= circleTriangleCount; i++) 
-	{
-		circleMeshCPU.vertexArray.push_back(
-			{
-				glm::vec3(
-					radius * cos(i * twoRadians / circleTriangleCount),
-					radius * sin(i * twoRadians / circleTriangleCount),
-					circleDepth
-				),
-
-				circleColour
-			}
-		);
-	}
-
-
-	glGenVertexArrays(1, &circleVaoID);
-	glBindVertexArray(circleVaoID);
-
-	glGenBuffers(1, &circleVboID);
-	glBindBuffer(GL_ARRAY_BUFFER, circleVboID); 
-
-
-	glBufferData(GL_ARRAY_BUFFER,	
-		circleMeshCPU.vertexArray.size() * sizeof(VertexPosColor),		
-		circleMeshCPU.vertexArray.data(),	
-		GL_STATIC_DRAW);	
-
-	glEnableVertexAttribArray(0); 
-	glVertexAttribPointer(
-		0,						  
-		3,						 
-		GL_FLOAT,				 
-		GL_FALSE,				  
-		sizeof(VertexPosColor),   
-		reinterpret_cast<const void*>(offsetof(VertexPosColor, position)) 
-	);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(
-		1,						  
-		3,						 
-		GL_FLOAT,				 
-		GL_FALSE,				
-		sizeof(VertexPosColor),   
-		reinterpret_cast<const void*>(offsetof(VertexPosColor, color)) 
-	);
-
-	circleCount = static_cast<GLsizei>(circleMeshCPU.vertexArray.size());
-
-	glBindVertexArray(0);
-
+	glBindVertexArray( 0 ); // Kapcsoljuk ki a VAO-t!
 }
 
 void CMyApp::CleanGeometry()
 {
 	glDeleteBuffers(1,      &vboID);
+	glDeleteBuffers(1,      &iboID);
 	glDeleteVertexArrays(1, &vaoID);
-
-	glDeleteBuffers(1, &circleVboID);
-	glDeleteVertexArrays(1, &circleVaoID);
 }
 
 bool CMyApp::Init()
@@ -176,10 +132,19 @@ bool CMyApp::Init()
 	// egyéb inicializálás
 	//
 
-	glEnable(GL_CULL_FACE); // kapcsoljuk be a hátrafelé néző lapok eldobását
+	glDisable(GL_CULL_FACE); // kapcsoljuk ki a hátrafelé néző lapok eldobását
 	glCullFace(GL_BACK);    // GL_BACK: a kamerától "elfelé" néző lapok, GL_FRONT: a kamera felé néző lapok
+	//glPolygonMode(GL_BACK, GL_LINE); //hátoldala vonalakkal jelenjen meg, debugra jó
 
 	glEnable(GL_DEPTH_TEST); // mélységi teszt bekapcsolása (takarás)
+
+	// kamera
+	m_camera.SetView(
+		glm::vec3(0, 0.0, 10.0),// honnan nézzük a színteret	   - eye
+		glm::vec3(0.0, 0.0, 0.0),   // a színtér melyik pontját nézzük - at
+		glm::vec3(0.0, 1.0, 0.0));  // felfelé mutató irány a világban - up
+
+	m_camera_manipulator.SetCamera(&m_camera); //szorgalmi házi: fps kamera
 
 	return true;
 }
@@ -193,6 +158,8 @@ void CMyApp::Clean()
 void CMyApp::Update( const SUpdateInfo& updateInfo )
 {
 	m_ElapsedTimeInSec = updateInfo.ElapsedTimeInSec;
+
+	m_camera_manipulator.Update(0);
 }
 
 void CMyApp::Render()
@@ -204,45 +171,52 @@ void CMyApp::Render()
 	// - VAO beállítása
 	glBindVertexArray( vaoID );
 
-	// shader bekapcsolasa
+	// - shader bekapcsolasa
 	glUseProgram( m_programID );
 
-	// kirajzolás: https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glDrawArrays.xhtml
-	glDrawArrays( GL_TRIANGLES,	// primitív típusa; amikkel mi foglalkozunk: GL_POINTS, GL_LINE_STRIP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES
-				  0,			// melyik vertex az elso
-				  count );		// hány csúcspontot használjunk a primitívek kirajzolására
+	// - Uniform paraméterek
+
+	// view és projekciós mátrix
+	glUniformMatrix4fv( ul("viewProj"), 1, GL_FALSE, glm::value_ptr( m_camera.GetViewProj() ) );
+
+	// Transzformációs mátrixok, világtranszformáció"
+	glm::mat4 matWorld = glm::rotate(glm::radians(45.f), glm::vec3(1,0,0));
+
+	// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glUniform.xhtml
+	glUniformMatrix4fv( ul("world"),// erre a helyre töltsünk át adatot
+						1,			// egy darab mátrixot
+						GL_FALSE,	// NEM transzponálva
+						glm::value_ptr( matWorld ) ); // innen olvasva a 16 x sizeof(float)-nyi adatot
+
+	// Rajzolási parancs kiadása
+	// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawElements.xhtml
+	glDrawElements( GL_TRIANGLES,    // primitív típusa; u.a mint glDrawArrays esetén
+					count,			 // mennyi indexet rajzoljunk
+					GL_UNSIGNED_INT, // indexek típusa
+					nullptr );       // hagyjuk nullptr-en!
+
+	// shader kikapcsolasa
+	glUseProgram( 0 );
 
 	// VAO kikapcsolása
 	glBindVertexArray( 0 );
-
-	glBindVertexArray(circleVaoID);
-
-	glDrawArrays(GL_TRIANGLE_FAN,	// primitív típusa; amikkel mi foglalkozunk: GL_POINTS, GL_LINE_STRIP, GL_LINES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_TRIANGLES
-				0,			// melyik vertex az elso
-				circleCount);		// hány csúcspontot használjunk a primitívek kirajzolására
-
-
-	glBindVertexArray(0);
-	// shader kikapcsolasa
-	glUseProgram(0);
-	
 }
 
 void CMyApp::RenderGUI()
 {
-	//ImGui::ShowDemoWindow();
+	// ImGui::ShowDemoWindow();
+}
 
-	if (ImGui::Begin("Trig Count Window 9000"))
-	{
-		if (ImGui::SliderInt("Trig count", &circleTriangleCount, 5, 100))
-		{
-			Clean();
-			InitShaders();
-			InitGeometry();
-			Render();
-		}
-	}
-	ImGui::End();
+GLint CMyApp::ul( const char* uniformName ) noexcept
+{
+	GLuint programID = 0;
+
+	// Kérdezzük le az aktuális programot!
+	// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGet.xhtml
+	glGetIntegerv( GL_CURRENT_PROGRAM, reinterpret_cast<GLint*>( &programID ) );
+	// A program és a uniform név ismeretében kérdezzük le a location-t!
+	// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glGetUniformLocation.xhtml
+	return glGetUniformLocation( programID, uniformName );
 }
 
 // https://wiki.libsdl.org/SDL2/SDL_KeyboardEvent
@@ -279,7 +253,7 @@ void CMyApp::KeyboardUp(const SDL_KeyboardEvent& key)
 
 void CMyApp::MouseMove(const SDL_MouseMotionEvent& mouse)
 {
-
+	m_camera_manipulator.MouseMove(mouse);
 }
 
 // https://wiki.libsdl.org/SDL2/SDL_MouseButtonEvent
@@ -303,6 +277,7 @@ void CMyApp::MouseWheel(const SDL_MouseWheelEvent& wheel)
 void CMyApp::Resize(int _w, int _h)
 {
 	glViewport(0, 0, _w, _h);
+	m_camera.SetAspect( static_cast<float>(_w) / _h );
 }
 
 // Le nem kezelt, egzotikus esemény kezelése
