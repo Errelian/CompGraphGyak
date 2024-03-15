@@ -88,16 +88,14 @@ void CMyApp::InitGeometry()
 
 	count = static_cast<GLsizei>(meshCPU.vertexArray.size());
 	
-	glBindVertexArray( 0 ); // Kapcsoljuk ki a VAO-t!
+	//glBindVertexArray( 0 ); // Kapcsoljuk ki a VAO-t!
+
+	constexpr GLfloat twoRadians = 2.0f * 3.14159265f;
+	constexpr GLfloat radius = 0.5f;
+	constexpr glm::vec3 circleColour = glm::vec3(1, 0, 0);
+	constexpr GLfloat circleDepth = -0.5f;
 
 	MeshObject<VertexPosColor> circleMeshCPU;
-
-	int circleTriangleCount = 100;
-
-	GLfloat twoRadians = 2.0f * 3.14159265;
-	GLfloat radius = 0.5;
-
-	glm::vec3 circleColour = glm::vec3(1, 0, 0);
 
 	circleMeshCPU.vertexArray.push_back({ glm::vec3(0,0,0), circleColour }); //center
 
@@ -108,7 +106,7 @@ void CMyApp::InitGeometry()
 				glm::vec3(
 					radius * cos(i * twoRadians / circleTriangleCount),
 					radius * sin(i * twoRadians / circleTriangleCount),
-					-0.5
+					circleDepth
 				),
 
 				circleColour
@@ -232,7 +230,19 @@ void CMyApp::Render()
 
 void CMyApp::RenderGUI()
 {
-	// ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
+
+	if (ImGui::Begin("Trig Count Window 9000"))
+	{
+		if (ImGui::SliderInt("Trig count", &circleTriangleCount, 5, 100))
+		{
+			Clean();
+			InitShaders();
+			InitGeometry();
+			Render();
+		}
+	}
+	ImGui::End();
 }
 
 // https://wiki.libsdl.org/SDL2/SDL_KeyboardEvent

@@ -65,15 +65,17 @@ protected:
 
 	// Geometriával kapcsolatos változók
 
-	GLuint circleVaoID = 1; //circle vao
-	GLuint circleVboID = 1; //circle vbo
-
-	GLsizei circleCount = 0; //circle vertex count
-
 	GLuint  vaoID = 0; // vertex array object erőforrás azonosító
 	GLuint  vboID = 0; // vertex buffer object erőforrás azonosító
 
 	GLsizei count = 0; // mennyi indexet/vertexet kell rajzolnunk
+
+	GLuint circleVaoID = 1; //circle vao, these cannot be const -.-
+	GLuint circleVboID = 1; //circle vbo
+
+	GLsizei circleCount = 0; //circle vertex count
+
+	int circleTriangleCount = 100;
 
 	// Geometria inicializálása, és törtlése
 	void InitGeometry();
