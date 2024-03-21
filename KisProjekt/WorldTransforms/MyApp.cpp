@@ -1,5 +1,6 @@
 #include "MyApp.h"
 #include "SDL_GLDebugMessageCallback.h"
+#include <random>
 
 #include <imgui.h>
 
@@ -187,8 +188,10 @@ bool CMyApp::Init()
 	// egyéb inicializálás
 	//
 
-	glDisable(GL_CULL_FACE); // kapcsoljuk be a hátrafelé néző lapok eldobását //TODO SET TO ENABLE, IF I FORGOT TO SET THIS TO ENABLE IM TERRIBLY SORRY
-	glPolygonMode(GL_BACK, GL_LINE);
+	GenerateCoordinates();
+
+	glEnable(GL_CULL_FACE); // kapcsoljuk be a hátrafelé néző lapok eldobását //TODO SET TO ENABLE, IF I FORGOT TO SET THIS TO ENABLE IM TERRIBLY SORRY
+	//glPolygonMode(GL_BACK, GL_LINE);
 	glCullFace(GL_BACK);    // GL_BACK: a kamerától "elfelé" néző lapok, GL_FRONT: a kamera felé néző lapok
 
 	glEnable(GL_DEPTH_TEST); // mélységi teszt bekapcsolása (takarás)
@@ -202,6 +205,31 @@ bool CMyApp::Init()
 	m_cameraManipulator.SetCamera( &m_camera );
 
 	return true;
+}
+
+void CMyApp::GenerateCoordinates() 
+{
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_real_distribution<> distr(-5.0f, 5.0f);
+	int i = 0;
+	while (i < 6)
+	{
+		float x = distr(gen);
+		float y = distr(gen);
+		float z = distr(gen);
+
+		float term1 = powf(x, 3.0);
+		float term2 = powf(y, 4.0);
+		float term3 = x * y;
+		float term4 = x * powf(z, 3.0);
+
+		if ((term1 + term2 - term3 + term4) < 10)
+		{
+			displacementPoints.push_back(glm::vec3(x, y, z));
+			i++;
+		}
+	}
 }
 
 void CMyApp::Clean()
@@ -243,20 +271,15 @@ void CMyApp::Render()
 
 	*/
 
-	glm::mat4 matWorld = glm::identity<glm::mat4>();
-	
-	// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glUniform.xhtml
-	glUniformMatrix4fv( ul("world"),// erre a helyre töltsünk át adatot
-						1,			// egy darab mátrixot
-						GL_FALSE,	// NEM transzponálva
-						glm::value_ptr( matWorld ) ); // innen olvasva a 16 x sizeof(float)-nyi adatot
+	/*glm::mat4 matWorld = glm::identity<glm::mat4>();
+	glUniformMatrix4fv( ul("world"), 1, GL_FALSE, glm::value_ptr( matWorld ) );
+	glDrawElements( GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr );*/
 
-	// Rajzolási parancs kiadása
-	// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glDrawElements.xhtml
-	glDrawElements( GL_TRIANGLES,    // primitív típusa; u.a mint glDrawArrays esetén
-					count,			 // mennyi indexet rajzoljunk
-					GL_UNSIGNED_INT, // indexek típusa
-					nullptr );       // hagyjuk nullptr-en!
+	for (int i = 0; i < 6; i++) {
+		glm::mat4 matWorld = glm::translate(displacementPoints[i]);
+		glUniformMatrix4fv(ul("world"), 1, GL_FALSE, glm::value_ptr(matWorld));
+		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
+	}
 
 	// shader kikapcsolasa
 	glUseProgram( 0 );

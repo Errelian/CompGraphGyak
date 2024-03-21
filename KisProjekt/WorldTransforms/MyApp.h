@@ -82,5 +82,10 @@ protected:
 	// Geometria inicializálása, és törtlése
 	void InitGeometry();
 	void CleanGeometry();
+
+
+	//helper stuff
+	std::vector<glm::vec3> displacementPoints;
+	void GenerateCoordinates();
 };
 
