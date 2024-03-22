@@ -87,5 +87,8 @@ protected:
 	//helper stuff
 	std::vector<glm::vec3> displacementPoints;
 	void GenerateCoordinates();
+
+	bool space_pressed = false;
+	float rotation_state = 0.0f;
 };
 

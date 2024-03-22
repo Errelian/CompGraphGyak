@@ -1,0 +1,30 @@
+ Általános tudnivalók és követelmények a kisbeadandó feladatokkal kapcsolatban
+
+    Minden részfeladat a mellette feltüntetett skálán (0-1, 0-2 vagy 0-3) kerül pontozásra
+    A részfeladatokat egyetlen programban kell megvalósítani
+    A megoldást mindenkinek a Teams-ben meghirdetett feladathoz kell feltölteni és beadni.
+    Az elkészített beadandókat nem elég beküldeni, hanem a gyakorlatvezető által adott bemutatási alkalmak egyikén be is kell mutatni!
+    A beküldésben csak a szükséges forrásfájlok szerepelhetnek! Arról, hogy hogyan készítsük elő a projektünket beadandó beküldésére, bővebben ITT.
+
+Érvénytelenek (azaz -15 illetve -10 pontot érnek) azok a megoldások amelyek:
+
+    Határidő után kerültek beküldésre
+    Nem kerültek bemutatásra
+    Bemutatás során értékelhetetlennek bizonyultak, azaz az összpontszám nem éri el az 1-et.
+    Nem a gyakorlaton látott keretrendszer segítségével kerültek megvalósításra.
+    Nem a beküldő munkája.
+
+Első kisbeadandó feladat
+A feladatok beküldési határideje 2024. április 7., vasárnap, 23:59. Feladatonként 2 pont, összesen 8 pont szerezhető. Sikertelen beküldés/bemutatás esetén -15 pont.
+
+    A kiírásban szereplő alakzatok zártak kell, hogy legyenek (azaz pl. henger esetén nem elég a palástját kirajzolni, szükség van a tetején és alján egy-egy körlap megjelenítésére is).
+    Henger és kúp esetén a "valamilyen síkon álló" azt jelenti, hogy a megfelelő alakzat egyik körlapja azon a síkon van.
+    Az alakzatokat illetve mozgáspályákat nem kell megjeleníteni külön geometriával, csak annak megfelelően kell elhelyezni az objektumokat, illetve mozgatni az objektumok alakzatait.
+    A VBO-ban tárolt geometria minden háromszöge különböző színű kell legyen.
+    Az összes geometriának helyesen kell megjelennie hátlapeldobás mellett.
+
+Egyedi feladat:
+ Készíts egy alkalmazást, amiben létrehozol egy XZ síkon álló, 1 sugarú kör alapú (közelíthető sokszöggel), 3 egység magas hengert  (2 pont)
+ A fent elkészített geometriát rajzold ki - az orientációja megtartásával - a következõ formációban: 6 olyan random p = (x,y,z) pontban, melyre teljesül, hogy x^3+ y^4 – x*y+ x*z^3 <10, és –5 <= x,y,z<= 5. Megjegyzés: Érdemes a "Hit or Miss" módszert alkalmazni. Részletekért keresd a gyakorlat vezetőt!  (2 pont)
+ Az így kirajzolt formációt mozgasd a következõ pályán: egy origó középpontú, 9 sugarú gömb felületén (ne síkbeli legyen a pálya!)  (2 pont)
+ A felhasználó a következõképpen állíthassa a színtérbeli történéseket: a szóköz billentyű lenyomására kezdjenek el forogni a formációban résztvevő geometriák a saját Y tengelyük körül (tehát ne az egész alakzat, hanem külön-külön a geometriák). Újabb szóköz billentyű esetén álljon meg ez a forgás.  (2 pont)

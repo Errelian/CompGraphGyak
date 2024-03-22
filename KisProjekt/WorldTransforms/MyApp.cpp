@@ -270,13 +270,34 @@ void CMyApp::Render()
 		glm::scale<float>( glm::vec3(s_x, s_y, s_z) ) <- skálázás
 
 	*/
+	
 
-	/*glm::mat4 matWorld = glm::identity<glm::mat4>();
+	glm::mat4 matWorld = glm::identity<glm::mat4>();
 	glUniformMatrix4fv( ul("world"), 1, GL_FALSE, glm::value_ptr( matWorld ) );
-	glDrawElements( GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr );*/
+	glDrawElements( GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr );
 
+
+	float a = m_ElapsedTimeInSec * glm::two_pi<float>() / 10.f;
+
+	float b = rotation_state * glm::two_pi<float>() / 10.f;
 	for (int i = 0; i < 6; i++) {
-		glm::mat4 matWorld = glm::translate(displacementPoints[i]);
+		glm::mat4 matWorld = glm::identity<glm::mat4>();
+
+		if (space_pressed) {
+			rotation_state = rotation_state + 0.05f;
+		}
+
+		matWorld = glm::rotate(0.5f / (float)6 * glm::three_over_two_pi<float>() + b, glm::vec3(0, 1, 0)) * matWorld;
+		matWorld = glm::translate(displacementPoints[i]) * matWorld;
+
+		matWorld =
+			glm::rotate(0.5f / (float)6 * glm::three_over_two_pi<float>() + a, glm::vec3(0, 1, 0))
+			*
+			glm::rotate(0.5f / (float)6 * glm::three_over_two_pi<float>() + a, glm::vec3(0, 0, 1))
+			*
+			glm::translate(glm::vec3(9, 0, 0))
+			*
+			matWorld;
 		glUniformMatrix4fv(ul("world"), 1, GL_FALSE, glm::value_ptr(matWorld));
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
@@ -327,6 +348,11 @@ void CMyApp::KeyboardDown(const SDL_KeyboardEvent& key)
 			GLenum polygonMode = ( polygonModeFrontAndBack[ 0 ] != GL_FILL ? GL_FILL : GL_LINE ); // Váltogassuk FILL és LINE között!
 			// https://registry.khronos.org/OpenGL-Refpages/gl4/html/glPolygonMode.xhtml
 			glPolygonMode( GL_FRONT_AND_BACK, polygonMode ); // Állítsuk be az újat!
+		}
+
+		if (key.keysym.sym == SDLK_SPACE)
+		{
+			space_pressed = !space_pressed;
 		}
 	}
 	m_cameraManipulator.KeyboardDown( key );
