@@ -288,7 +288,7 @@ void CMyApp::Render()
 		}
 
 		matWorld = glm::rotate(0.5f / (float)6 * glm::three_over_two_pi<float>() + b, glm::vec3(0, 1, 0)) * matWorld;
-		matWorld = glm::translate(displacementPoints[i]) * matWorld;
+		
 
 		matWorld =
 			glm::rotate(0.5f / (float)6 * glm::three_over_two_pi<float>() + a, glm::vec3(0, 1, 0))
@@ -298,6 +298,9 @@ void CMyApp::Render()
 			glm::translate(glm::vec3(9, 0, 0))
 			*
 			matWorld;
+
+		matWorld = glm::translate(displacementPoints[i]) * matWorld;
+
 		glUniformMatrix4fv(ul("world"), 1, GL_FALSE, glm::value_ptr(matWorld));
 		glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_INT, nullptr);
 	}
