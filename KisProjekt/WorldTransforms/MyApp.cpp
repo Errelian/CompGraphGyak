@@ -82,20 +82,20 @@ void CMyApp::InitGeometry()
 
 	for (int i = 65; i < (pointCount * 2) - 1; i++) {
 
-		meshCPU.indexArray.push_back(65);
+		meshCPU.indexArray.push_back(pointCount + 1);
 		meshCPU.indexArray.push_back(i + 1);
 		meshCPU.indexArray.push_back(i + 2);
 	}
-	meshCPU.indexArray.push_back(65);
+	meshCPU.indexArray.push_back(pointCount + 1);
 	meshCPU.indexArray.push_back(pointCount * 2);
-	meshCPU.indexArray.push_back(66);
+	meshCPU.indexArray.push_back(pointCount + 2);
 
 	//second circle is complete, now to connect them, first, bottom to top
 
 	for (int i = 0; i < pointCount; i++) {
 
 		meshCPU.indexArray.push_back(i);
-		meshCPU.indexArray.push_back(i + 1); //JESUS TAKE THE WHEEL
+		meshCPU.indexArray.push_back(i + 1);
 		meshCPU.indexArray.push_back(i + pointCount);
 	}
 	meshCPU.indexArray.push_back(1);
@@ -107,13 +107,13 @@ void CMyApp::InitGeometry()
 	for (int i = 65; i < pointCount * 2; i++) {
 
 		meshCPU.indexArray.push_back(i - pointCount + 1);
-		meshCPU.indexArray.push_back(i + 1); //JESUS TAKE THE WHEEL
+		meshCPU.indexArray.push_back(i + 1);
 		meshCPU.indexArray.push_back(i);
 	}
 
 	meshCPU.indexArray.push_back(pointCount * 2);
 	meshCPU.indexArray.push_back(1);
-	meshCPU.indexArray.push_back(66);
+	meshCPU.indexArray.push_back(pointCount + 2);
 
 	//this should be a separate function, I'll see if I get around to it
 	//but hey, this isn't going to production!
